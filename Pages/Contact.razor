@@ -1,0 +1,101 @@
+﻿@page "/contact"
+
+<div class="container text-white">
+    <h1 class="display-4 text-center">Feedback</h1>
+    <hr class="border-dark" />
+    <h2 class="major">Get in touch</h2>
+    <p class="lead">Contact me in Any Subject Related to Development</p>
+    <EditForm Model="@contact" OnValidSubmit="ContactMe">
+
+        <div class="form-group">
+            <label for="name">
+                Your Name:
+            </label>
+            <InputText @attributes="InputAttributes" type="text" name="name" id="name" @bind-Value="contact.Name" />
+        </div>
+        <div class="form-group">
+            <label for="email">
+                Your Email:
+
+            </label>
+            <InputText @attributes="InputAttributes" type="email" name="email" id="email" @bind-Value="contact.Email" />
+        </div>
+        <div class="form-group">
+            <label for="message">
+                Message:
+            </label>
+            <InputTextArea name="message" id="message" @attributes="InputAttributes" @bind-Value="contact.Message" rows="4"></InputTextArea>
+
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-outline-light" @onclick="CheckMessage">Send Message</button>
+        </div>
+
+        @{
+            if (MessageSent)
+            {
+                <div class="text-success">
+                    Your Message has been sent. Thank you
+                </div>
+            }
+        }
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <hr class="border-dark" />
+    </EditForm>
+    <div class="col">
+        <p class="p-0 text-md-left">
+            <i class="icon solid fa-home fa-lg" aria-hidden="true"></i>
+            Waseem Rkab<br />
+            Isfiya, Mount Carmel<br />
+            Haifa, Israel
+        </p>
+        <p class="p-0">
+            <i class="icon solid fa-phone fa-lg" aria-hidden="true"></i>
+            <a href="tel:+97254-7500-793">+972 54-750-0793</a>
+        </p>
+        <p class="p-0">
+            <i class="icon solid fa-envelope fa-lg" aria-hidden="true"></i>
+            <a target="_blank" href="mailto:rakab.waseem@gmail.com">rakab.waseem@gmail.com</a>
+        </p>
+        <p class="p-0">
+            <i class="icon brands fa-github fa-lg"></i>
+            <a target="_blank" href="https://github.com/WaseemRkab">github.com/WaseemRkab</a>
+        </p>
+        <p class="p-0">
+            <i class="icon brands fa-linkedin fa-lg"></i>
+            <a target="_blank" href="https://www.linkedin.com/in/waseem-rkab-7146901a1">linkedin.com/in/waseem-rkab-7146901a1</a>
+        </p>
+        <ul>
+            <li>&copy; 2020 Waseem Rkab. All Rights Reserved.</li>
+        </ul>
+    </div>
+</div>
+
+@inject WaseemRkab_Portfolio.Data.EmailSender sender
+@code{
+    private ContactModel contact = new ContactModel();
+
+    private bool MessageSent = false;
+
+    [Microsoft.AspNetCore.Components.Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object> InputAttributes { get; set; } = new Dictionary<string, object>()
+{
+        {"style","border-radius:5px" },
+        {"class","form-control" }
+    };
+
+
+    private async Task ContactMe()
+    {
+        if (!MessageSent)
+        {
+            await sender.SendEmailAsync(contact.Email, $"Feedback", $"Name: {contact.Name}<br/>Message: {contact.Message}");
+            MessageSent = true;
+        }
+    }
+    private void CheckMessage()
+    {
+        MessageSent = false;
+    }
+}
