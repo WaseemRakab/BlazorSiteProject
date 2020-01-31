@@ -1,14 +1,19 @@
 ﻿@page "/portfolio"
 
-
-
 <div class="jumbotron">
     @{
         if (Repositories is null)
         {
-            <h3 class="display-4 text-center">
-                Loading Projects, Please Wait...
-            </h3>
+            if (ErrorOccurred)
+            {
+                <h4 class="display-4 text-center">An Error Occurred while Loading Projects.</h4>
+            }
+            else
+            {
+                <h3 class="display-4 text-center">
+                    Loading Projects, Please Wait...
+                </h3>
+            }
         }
         else
         {
@@ -32,7 +37,7 @@
                                     {
                                         <p class="lead">
                                             Site Url:
-                                           <a class="btn-link" target="_blank" href="@Repositories[i].Homepage">@Repositories[i].Homepage</a>
+                                            <a class="btn-link" target="_blank" href="@Repositories[i].Homepage">@Repositories[i].Homepage</a>
                                         </p>
                                     }
                                 }
@@ -42,7 +47,7 @@
                                     <a href="@Repositories[i].HtmlUrl" target="_blank" class="form-group btn btn-primary">
                                         Open With <i class="icon brands fas fa-github fa-lg"></i> GitHub
                                     </a>
-                                    <a href="@($"git-client://clone?repo={Repositories[i].HtmlUrl}")" class="form-group btn btn-success">
+                                    <a href="@($"git-client://clone?repo={Repositories[i].HtmlUrl}")" title="Clone" class="form-group btn btn-success">
                                         Open With Visual Studio
                                     </a>
                                 </div>
@@ -56,19 +61,19 @@
 </div>
 
 
-
 @inject CredentialsService Credentials
 @code {
-    private GitHubCredentials GitHubCredentials;
     private IReadOnlyList<Repository> Repositories;
-    private GitHubClient GitHubClient;
+    private bool ErrorOccurred = false;
 
     protected async override Task OnInitializedAsync()
     {
-        GitHubCredentials = Credentials.GitHubCredentials;
-        GitHubClient = new GitHubClient(new ProductHeaderValue("WaseemRkab"));
-        GitHubClient.Credentials = new Credentials(GitHubCredentials.AccessToken);
-
-        Repositories = await GitHubClient.Repository.GetAllForCurrent();
+        var GitHubClient = new GitHubClient(new ProductHeaderValue("WaseemRkab"));
+        GitHubClient.Credentials = new Credentials(Credentials.GitHubCredentials.AccessToken);
+        try
+        {
+            Repositories = await GitHubClient.Repository.GetAllForCurrent();
+        }
+        catch { ErrorOccurred = true; }
     }
 }
