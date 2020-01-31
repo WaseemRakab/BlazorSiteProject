@@ -14,29 +14,37 @@
         {
             <h4 class="display-4 text-center">My Projects</h4>
             <hr class="border-white" />
-
             for (int i = 0; i < Repositories.Count; ++i)
             {
-                <div class="container">
-                    <div class="card">
-                        <div class="card-header lead">
-                            @Repositories[i].Name
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col">
-                                    <p class="lead text-info">Description: </p>
-                                    <p class="lead">@(Repositories[i].Description)</p>
-                                </div>
-                                <div class="d-flex px-md-5 justify-content-center align-items-center">
-                                    <div class="btn-group-vertical">
-                                        <a href="@($"git-client://clone?repo={Repositories[i].HtmlUrl}")" class="form-group btn btn-success">
-                                            Open With Visual Studio
-                                        </a>
-                                        <a href="@Repositories[i].HtmlUrl" target="_blank" class="form-group btn btn-primary">
-                                            Open With <i class="icon brands fas fa-github fa-lg"></i> GitHub
-                                        </a>
-                                    </div>
+                <div class="card form-group">
+                    <div class="card-header lead">
+                        @Repositories[i].Name
+                    </div>
+                    <div class="card-body">
+                        <div class="row form-group">
+                            <div class="col">
+                                <p class="lead text-info">Description: </p>
+                                <p class="lead">
+                                    @(Repositories[i].Description)
+                                </p>
+                                @{
+                                    if (!string.IsNullOrEmpty(Repositories[i].Homepage))
+                                    {
+                                        <p class="lead">
+                                            Site Url:
+                                           <a class="btn-link" target="_blank" href="@Repositories[i].Homepage">@Repositories[i].Homepage</a>
+                                        </p>
+                                    }
+                                }
+                            </div>
+                            <div class="d-flex px-md-5 justify-content-center align-items-center">
+                                <div class="btn-group-vertical">
+                                    <a href="@Repositories[i].HtmlUrl" target="_blank" class="form-group btn btn-primary">
+                                        Open With <i class="icon brands fas fa-github fa-lg"></i> GitHub
+                                    </a>
+                                    <a href="@($"git-client://clone?repo={Repositories[i].HtmlUrl}")" class="form-group btn btn-success">
+                                        Open With Visual Studio
+                                    </a>
                                 </div>
                             </div>
                         </div>
