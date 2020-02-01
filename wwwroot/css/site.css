@@ -112,11 +112,11 @@ app {
 }
 
 .invalid {
-    box-shadow: 0 0 3pt 2pt #FFC107;
+    box-shadow: 0 0 3pt 2pt #d9534f;
 }
 
 .validation-message {
-    color: #ffc107;
+    color: #d9534f;
 }
 
 #blazor-error-ui {

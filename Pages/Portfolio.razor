@@ -1,52 +1,65 @@
 ﻿@page "/portfolio"
 
-
-
 <div class="jumbotron">
     @{
         if (Repositories is null)
         {
-            <h3 class="display-4 text-center">
-                Loading Projects, Please Wait...
-            </h3>
+            if (ErrorOccurred)
+            {
+                <p class="lead text-center">
+                    An Error Occurred While Loading Projects, Please Try Again later.
+                </p>
+            }
+            else
+            {
+                <h3 class="display-4 text-center">
+                    Loading Projects, Please Wait...
+                </h3>
+            }
         }
         else
         {
-            <h4 class="display-4 text-center">My Projects</h4>
+            <h4 class="display-4 text-center">My Portfolio</h4>
             <hr class="border-white" />
-            for (int i = 0; i < Repositories.Count; ++i)
+            foreach (var Repository in Repositories)
             {
                 <div class="card form-group">
                     <div class="card-header lead">
-                        @Repositories[i].Name
+                        @Repository.Name [@Repository.Language]
                     </div>
                     <div class="card-body">
                         <div class="row form-group">
                             <div class="col">
                                 <p class="lead text-info">Description: </p>
                                 <p class="lead">
-                                    @(Repositories[i].Description)
+                                    @(Repository.Description)
                                 </p>
                                 @{
-                                    if (!string.IsNullOrEmpty(Repositories[i].Homepage))
+                                    if (!string.IsNullOrEmpty(Repository.Homepage))
                                     {
                                         <p class="lead">
                                             Site Url:
-                                           <a class="btn-link" target="_blank" href="@Repositories[i].Homepage">@Repositories[i].Homepage</a>
+                                            <a class="btn-link" target="_blank" href="@Repository.Homepage">@Repository.Homepage</a>
                                         </p>
                                     }
                                 }
                             </div>
                             <div class="d-flex px-md-5 justify-content-center align-items-center">
                                 <div class="btn-group-vertical">
-                                    <a href="@Repositories[i].HtmlUrl" target="_blank" class="form-group btn btn-primary">
-                                        Open With <i class="icon brands fas fa-github fa-lg"></i> GitHub
+                                    <a href="@Repository.HtmlUrl" target="_blank" class="form-group btn btn-primary">
+                                        Open With GitHub <i class="icon brands fas fa-github fa-lg"></i>
                                     </a>
-                                    <a href="@($"git-client://clone?repo={Repositories[i].HtmlUrl}")" title="Clone" class="form-group btn btn-success">
+                                    <a href="@($"git-client://clone?repo={Repository.HtmlUrl}")" title="Clone" class="form-group btn btn-success">
                                         Open With Visual Studio
                                     </a>
                                 </div>
                             </div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="@(id=>GetReadMeFile(Repository.Id))" data-toggle="modal" data-target="#ReadMe">
+                                More Details
+                                <i class="icon brands fas fa-readme fa-lg"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -55,20 +68,94 @@
     }
 </div>
 
+<div class="modal fade" id="readMe" data-toggle="modal" tabindex="-1" @onclick="OnClickCheckModal" role="dialog" aria-labelledby="ReadMe" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">@(ReadMeLoaded ? CurrentRepositoryTitle : new MarkupString(null))</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @{
+                    if (!ReadMeLoaded)
+                    {
+                        <p class="lead">
+                            Loading...
+                        </p>
+                    }
+                    else
+                    {
+                        @(CurrentReadMeHtml)
+                    }
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @*@onclick="ReadMeReset" *@ data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 @inject CredentialsService Credentials
+@inject IJSRuntime JSRuntime
 @code {
     private GitHubCredentials GitHubCredentials;
     private IReadOnlyList<Repository> Repositories;
+    private IRepositoryContentsClient RepositoryContents;
     private GitHubClient GitHubClient;
+
+    private MarkupString CurrentRepositoryTitle;
+    private MarkupString CurrentReadMeHtml;
+
+    private bool ReadMeLoaded = false;
+
+    private bool ErrorOccurred = false;
+
 
     protected async override Task OnInitializedAsync()
     {
         GitHubCredentials = Credentials.GitHubCredentials;
         GitHubClient = new GitHubClient(new ProductHeaderValue("WaseemRkab"));
         GitHubClient.Credentials = new Credentials(GitHubCredentials.AccessToken);
+        try
+        {
+            Repositories = await GitHubClient.Repository.GetAllForCurrent();
+            RepositoryContents = GitHubClient.Repository.Content;
+        }
+        catch { ErrorOccurred = true; }
+    }
 
-        Repositories = await GitHubClient.Repository.GetAllForCurrent();
+    private async Task GetReadMeFile(long RepositoryId)
+    {
+        try
+        {
+            CurrentRepositoryTitle = new MarkupString((await GitHubClient.Repository.Get(RepositoryId)).Name);
+            var readMeHtml = await RepositoryContents.GetReadmeHtml(RepositoryId);
+            var firstSvgIndex = readMeHtml.IndexOf("<h1>");
+            var lastSvgIndexCount = readMeHtml.IndexOf("</h1>") - firstSvgIndex;
+            CurrentReadMeHtml = new MarkupString(readMeHtml.Remove(firstSvgIndex, lastSvgIndexCount));
+            ReadMeLoaded = true;
+        }
+        catch { }
+    }
+
+    private async Task OnClickCheckModal()
+    {
+        var ReadMeModalAboutToHide = await JSRuntime.InvokeAsync<bool>("ReadMeModal");
+        if (ReadMeModalAboutToHide)
+        {
+            await ResetReadMeMessage();
+        }
+    }
+
+    private async Task ResetReadMeMessage()
+    {
+        await Task.Delay(TimeSpan.FromSeconds(0.2f));
+        CurrentReadMeHtml = new MarkupString(null);
+        CurrentRepositoryTitle = new MarkupString(null);
+        ReadMeLoaded = false;
     }
 }
