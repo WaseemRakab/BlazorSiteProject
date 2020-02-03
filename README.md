@@ -1,8 +1,8 @@
 # Waseem Rkab Site
 
->Web App Project.
->Build using ASP.NET Core Blazor - C#.
->has a Portfolio Page , Contact Me Page.
+>Web App Project.<br>
+>Build using ASP.NET Core Blazor - C#.<br>
+>has a Portfolio Page , Contact Me Page.<br>
 
 >Retrieving My Projects From GitHub Dynamically Using GitHub API(Octokit).
 >Contact me Page, Using Google API For Receiving Emails.
