@@ -9,3 +9,9 @@ window.ReadMeModal = () => {
 $(document).on('hide.bs.modal', '#readMe', () => {
     ReadMeModalShow = true;
 })
+
+window.CreateProfile = () => {
+    var profile = $('#profile').clone();
+    profile.removeAttr('hidden');
+    return profile.prop('outerHTML');
+}

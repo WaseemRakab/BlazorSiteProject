@@ -14,16 +14,16 @@
     <link rel="stylesheet" type="text/css" href="css/jquery-ui.css" />
     <link href="css/site.css" rel="stylesheet" type="text/css" />
     <link href="css/fontawesome-all.min.css" rel="stylesheet" type="text/css" />
-    <script src="js/jquery.js"></script>
-    <script src="js/bootstrap.bundle.js"></script>
-    <script src="js/jquery-ui.js"></script>
 </head>
 <body>
     <app>
         <component type="typeof(App)" render-mode="ServerPrerendered" />
-
+        <div hidden id="profile" class="LI-profile-badge" data-version="v1" data-size="large" data-locale="en_US" data-type="horizontal" data-theme="dark" data-vanity="waseemrkab">
+            <a class="LI-simple-link" href='https://il.linkedin.com/in/waseemrkab?trk=profile-badge'>
+                Waseem Rkab
+            </a>
+        </div>
     </app>
-
     <div id="blazor-error-ui">
         <environment include="Staging,Production">
             An error has occurred. This application may no longer respond until reloaded.
@@ -31,10 +31,15 @@
         <environment include="Development">
             An unhandled exception has occurred. See browser dev tools for details.
         </environment>
+
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
     </div>
     <script src="_framework/blazor.server.js"></script>
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.bundle.js"></script>
+    <script src="js/jquery-ui.js"></script>
+    <script type="text/javascript" src="https://platform.linkedin.com/badges/js/profile.js" async defer></script>
     <script src="js/site.js"></script>
 </body>
 </html>

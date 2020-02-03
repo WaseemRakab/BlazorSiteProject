@@ -6,7 +6,6 @@
     <h2 class="major">Get in touch</h2>
     <p class="lead">Contact me in Any Subject Related to Development</p>
     <EditForm Model="@contact" OnValidSubmit="ContactMe">
-
         <div class="form-group">
             <label for="name">
                 Your Name:
@@ -30,7 +29,6 @@
         <div class="form-group">
             <button type="submit" class="btn btn-outline-light" @onclick="CheckMessage">Send Message</button>
         </div>
-
         @{
             if (MessageSent)
             {
@@ -43,42 +41,59 @@
         <ValidationSummary />
         <hr class="border-dark" />
     </EditForm>
-    <div class="col">
-        <p class="p-0 text-md-left">
-            <i class="icon solid fa-home fa-lg" aria-hidden="true"></i>
-            Waseem Rkab<br />
-            Isfiya, Mount Carmel<br />
-            Haifa, Israel.
-        </p>
-        <p class="p-0">
-            <i class="icon solid fa-phone fa-lg" aria-hidden="true"></i>
-            <a href="tel:+97254-7500-793">+972 54-750-0793</a>
-        </p>
-        <p class="p-0">
-            <i class="icon solid fa-envelope fa-lg" aria-hidden="true"></i>
-            <a target="_blank" href="mailto:rakab.waseem@gmail.com">rakab.waseem@gmail.com</a>
-        </p>
-        <p class="p-0">
-            <i class="icon brands fa-github fa-lg"></i>
-            <a target="_blank" href="https://github.com/WaseemRkab">github.com/WaseemRkab</a>
-        </p>
-        <p class="p-0">
-            <i class="icon brands fa-linkedin fa-lg"></i>
-            <a target="_blank" href="https://www.linkedin.com/in/waseem-rkab-7146901a1">linkedin.com/in/waseem-rkab</a>
-        </p>
-        <p class="p-0">
-            <i class="icon solid fa-copyright fa-lg"></i>
-            2020 All Rights Reserved.
-            <i class="icon solid fa-arrow-left"></i>
-        </p>
+    <div class="row">
+        <div class="col">
+            <p class="p-0 text-md-left">
+                <i class="icon solid fa-home fa-lg" aria-hidden="true"></i>
+                Waseem Rkab<br />
+                Isfiya, Mount Carmel<br />
+                Haifa, Israel
+            </p>
+            <p class="p-0">
+                <i class="icon solid fa-phone fa-lg" aria-hidden="true"></i>
+                <a href="tel:+97254-7500-793">+972 54-750-0793</a>
+            </p>
+            <p class="p-0">
+                <i class="icon solid fa-envelope fa-lg" aria-hidden="true"></i>
+                <a target="_blank" href="mailto:rakab.waseem@gmail.com">rakab.waseem@gmail.com</a>
+            </p>
+            <p class="p-0">
+                <i class="icon brands fa-github fa-lg"></i>
+                <a target="_blank" href="https://github.com/WaseemRkab">github.com/WaseemRkab</a>
+            </p>
+            <p class="p-0">
+                <i class="icon brands fa-linkedin fa-lg"></i>
+                <a target="_blank" href="https://www.linkedin.com/in/waseemrkab/">linkedin.com/in/waseemrkab</a>
+            </p>
+            <p class="p-0">
+                <i class="icon solid fa-copyright fa-lg"></i>
+                2020 All Rights Reserved
+                <i class="icon solid fa-arrow-left"></i>
+            </p>
+        </div>
+        <div class="col-auto">
+            @{
+                if (ProfileLoaded)
+                {
+                    <div @ref="LinkedIn" id="LinkedIn">
+                        @Profile
+                    </div>
+                }
+            }
+        </div>
     </div>
-</div>
 
+</div>
+@inject IJSRuntime JSRuntime
 @inject WaseemRkab_Portfolio.Data.EmailSender sender
 @code{
     private ContactModel contact = new ContactModel();
 
     private bool MessageSent = false;
+
+    private bool ProfileLoaded = false;
+    private ElementReference LinkedIn;
+    private MarkupString Profile;
 
     [Microsoft.AspNetCore.Components.Parameter(CaptureUnmatchedValues = true)]
     public Dictionary<string, object> InputAttributes { get; set; } = new Dictionary<string, object>()
@@ -86,6 +101,19 @@
         {"style","border-radius:5px" },
         {"class","form-control" }
     };
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(0.5f));
+            var data = await JSRuntime.InvokeAsync<string>("CreateProfile");
+            Profile = new MarkupString(data);
+            ProfileLoaded = true;
+            StateHasChanged();
+        }
+    }
 
 
     private async Task ContactMe()
